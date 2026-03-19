@@ -15,4 +15,6 @@ export interface AppConfig {
 export interface AppConfigDatabase {
     driver: string
     url: string
+    username: string
+    password: string
 }
