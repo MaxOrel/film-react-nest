@@ -1,17 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { FilmsRepository } from 'src/repository/films.repository';
 
 @Injectable()
 export class FilmsService {
-  getFilms() {
+  constructor(private readonly repo: FilmsRepository) {}
+
+  async getFilms() {
+    const films = await this.repo.findAll();
+
     return {
-      items: [],
-      total: 0,
+      total: films.length,
+      items: films,
     };
   }
-  getFilmSchedule(id: string) {
+
+  async getFilmSchedule(id: string) {
+    const film = await this.repo.findScheduleByFilmId(id);
+
     return {
-      filmId: id,
-      schedule: [],
+      total: film?.calendar?.length || 0,
+      items: film?.calendar || [],
     };
   }
 }

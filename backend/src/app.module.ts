@@ -10,6 +10,10 @@ import { FilmsController } from './films/films.controller';
 import { FilmsService } from './films/films.service';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
+import { MongooseModule } from '@nestjs/mongoose';
+
+MongooseModule.forRoot(process.env.MONGO_URL)
+
 
 @Module({
   imports: [
@@ -19,7 +23,6 @@ import { OrderModule } from './order/order.module';
     }),
     FilmsModule,
     OrderModule,
-    // @todo: Добавьте раздачу статических файлов из public
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'public'),
       serveRoot: '/content/afisha',
@@ -28,4 +31,5 @@ import { OrderModule } from './order/order.module';
   controllers: [OrderController, FilmsController],
   providers: [configProvider, OrderService, FilmsService],
 })
+
 export class AppModule {}
