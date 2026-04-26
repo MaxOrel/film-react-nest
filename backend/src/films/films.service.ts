@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilmsRepository } from 'src/repository/films.repository';
 
 // обработка запросов, бизнес логика, взаимодействие с mongoose, но не напрямую
@@ -22,9 +22,25 @@ export class FilmsService {
   async getFilmSchedule(id: string) {
     const film = await this.repo.findScheduleByFilmId(id);
 
+    if (!film) {
+      throw new NotFoundException({
+        error: 'film not found',
+      });
+    }
+
+    const items = (film.schedule || []).map((session) => ({
+      id: session.id,
+      daytime: session.daytime,
+      hall: String(session.hall),
+      rows: session.rows,
+      seats: session.seats,
+      price: session.price,
+      taken: session.taken || [],
+    }));
+
     return {
-      total: film?.schedule?.length || 0,
-      items: film?.schedule || [],
+      total: items.length,
+      items,
     };
   }
 }
