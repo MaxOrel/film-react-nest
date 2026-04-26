@@ -1,17 +1,17 @@
-import { ConfigService } from '@nestjs/config';
+// import { ConfigService } from '@nestjs/config';
 
-export const configProvider = {
-  useFactory: (configService: ConfigService) => ({
-    uri: configService.get<string>('DATABASE_URL'),
-  }),
-  inject: [ConfigService],
-};
+// export const configProvider = {
+//   useFactory: (configService: ConfigService) => ({
+//     uri: configService.get<string>('DATABASE_URL'),
+//   }),
+//   inject: [ConfigService],
+// };
 
-export interface AppConfig {
-  database: AppConfigDatabase;
-}
+// export interface AppConfig {
+//   database: AppConfigDatabase;
+// }
 
-export interface AppConfigDatabase {
-  driver: string;
-  url: string;
-}
+// export interface AppConfigDatabase {
+//   driver: string;
+//   url: string;
+// }

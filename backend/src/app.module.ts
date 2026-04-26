@@ -13,10 +13,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('DATABASE_URL'),
-      }),
       inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const uri = configService.get<string>('DATABASE_URL');
+
+        if (!uri) {
+          throw new Error('DATABASE_URL is not defined');
+        }
+
+        return { uri };
+      },
     }),
 
     FilmsModule,
