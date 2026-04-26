@@ -1,16 +1,20 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { FilmsService } from './films.service';
 
+// принимает hhtp запросы от клиента
 @Controller('films')
 export class FilmsController {
   constructor(private readonly filmsService: FilmsService) {}
 
+  // все фильмы
   @Get()
-  getFilms() {
-    return this.filmsService.getFilms();
+  async getFilms() {
+    const result = await this.filmsService.getFilms();
+    return result;
   }
 
-  @Get(':id/shedule')
+  // конкретный фильм
+  @Get(':id/schedule')
   getFilmSchedule(@Param('id') id: string) {
     return this.filmsService.getFilmSchedule(id);
   }

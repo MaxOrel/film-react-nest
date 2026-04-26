@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateOrderDto } from './dto/order.dto';
+import { OrderItemDto } from './dto/order.dto';
 
 @Injectable()
 export class OrderService {
   private takenSeats: Record<string, string[]> = {};
 
-  createOrder(dto: CreateOrderDto[]) {
+  createOrder(dto: OrderItemDto[]) {
     if (!Array.isArray(dto) || dto.length === 0) {
       throw new BadRequestException({
         error: 'order is not a list or the order is an empty list',
@@ -22,7 +22,7 @@ export class OrderService {
     };
   }
 
-  bookSeats(dto: CreateOrderDto[]) {
+  bookSeats(dto: OrderItemDto[]) {
     for (const item of dto) {
       const key = item.film + '_' + item.session;
       const seatKey = `${item.row}:${item.seat}`;

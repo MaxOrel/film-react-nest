@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FilmsRepository } from 'src/repository/films.repository';
 
+// обработка запросов, бизнес логика, взаимодействие с mongoose, но не напрямую
 @Injectable()
 export class FilmsService {
   constructor(private readonly repo: FilmsRepository) {}
@@ -14,12 +15,16 @@ export class FilmsService {
     };
   }
 
+  async createFilm(dto: any) {
+    return this.repo.create(dto);
+  }
+
   async getFilmSchedule(id: string) {
     const film = await this.repo.findScheduleByFilmId(id);
 
     return {
-      total: film?.calendar?.length || 0,
-      items: film?.calendar || [],
+      total: film?.schedule?.length || 0,
+      items: film?.schedule || [],
     };
   }
 }

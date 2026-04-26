@@ -1,12 +1,8 @@
 import { ConfigService } from '@nestjs/config';
 
 export const configProvider = {
-  provide: 'CONFIG',
-  useFactory: (configService: ConfigService): AppConfig => ({
-    database: {
-      driver: 'mongo',
-      url: configService.get<string>('MONGO_URL'),
-    },
+  useFactory: (configService: ConfigService) => ({
+    uri: configService.get<string>('DATABASE_URL'),
   }),
   inject: [ConfigService],
 };

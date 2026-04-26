@@ -1,27 +1,19 @@
-import { Schema, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 
-export const FilmSchema = new Schema({
-  id: String,
-  rating: Number,
-  director: String,
-  tags: [String],
-  title: String,
-  about: String,
-  description: String,
-  image: String,
-  cover: String,
-});
-
+// работа с бд, делает запросы в mongoose
 @Injectable()
 export class FilmsRepository {
-  constructor(
-    @InjectModel('Film') private filmModel: Model<any>,
-  ) {}
+  constructor(@InjectModel('Film') private filmModel: Model<any>) {}
 
   async findAll() {
-    return this.filmModel.find();
+    const films = await this.filmModel.find();
+    return films;
+  }
+
+  async create(data: any) {
+    return this.filmModel.create(data);
   }
 
   async findScheduleByFilmId(filmId: string) {

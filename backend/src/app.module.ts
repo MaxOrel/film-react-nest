@@ -3,33 +3,22 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule } from '@nestjs/config';
 import * as path from 'node:path';
 
-import { configProvider } from './app.config.provider';
-import { OrderController } from './order/order.controller';
-import { OrderService } from './order/order.service';
-import { FilmsController } from './films/films.controller';
-import { FilmsService } from './films/films.service';
 import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
-MongooseModule.forRoot(process.env.MONGO_URL)
-
-
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      cache: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    MongooseModule.forRoot(process.env.DATABASE_URL),
+
     FilmsModule,
     OrderModule,
+
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'public'),
-      serveRoot: '/content/afisha',
     }),
   ],
-  controllers: [OrderController, FilmsController],
-  providers: [configProvider, OrderService, FilmsService],
 })
-
 export class AppModule {}
