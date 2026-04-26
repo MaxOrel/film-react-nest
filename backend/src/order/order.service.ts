@@ -4,9 +4,9 @@ import { FilmsRepository } from 'src/repository/films.repository';
 
 @Injectable()
 export class OrderService {
-  private takenSeats: Record<string, string[]> = {};
+  constructor(private readonly filmsRepo: FilmsRepository) {}
 
-  createOrder(dto: OrderItemDto[]) {
+  async createOrder(dto: OrderItemDto[]) {
     if (!Array.isArray(dto) || dto.length === 0) {
       throw new BadRequestException({
         error: 'order is not a list or the order is an empty list',
@@ -14,27 +14,36 @@ export class OrderService {
     }
 
     for (const item of dto) {
-      const key = item.film + '_' + item.session;
-      const seatKey = `${item.row}:${item.seat}`;
+      const film = await this.filmsRepo.findScheduleByFilmId(item.film);
 
-      if (!this.takenSeats[key]) {
-        this.takenSeats[key] = [];
+      if (!film) {
+        throw new BadRequestException({ error: 'film not found' });
       }
 
-      if (this.takenSeats[key].includes(seatKey)) {
+      const session = film.schedule.find((s) => s.id === item.session);
+
+      if (!session) {
+        throw new BadRequestException({ error: 'session not found' });
+      }
+
+      const seatKey = `${item.row}:${item.seat}`;
+
+      if (session.taken.includes(seatKey)) {
         throw new BadRequestException({
           error: 'the seat is already taken',
         });
       }
 
-      this.takenSeats[key].push(seatKey);
+      session.taken.push(seatKey);
+
+      await film.save();
     }
 
     return {
       total: dto.length,
-      items: dto.map((item, index) => ({
+      items: dto.map((item) => ({
         ...item,
-        id: `order-${index}`,
+        id: crypto.randomUUID(),
       })),
     };
   }
