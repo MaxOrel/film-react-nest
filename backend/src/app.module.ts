@@ -11,7 +11,7 @@ import { OrderModule } from './order/order.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
 
-    MongooseModule.forRoot(process.env.DATABASE_URL),
+    MongooseModule.forRoot('mongodb://localhost:27017/afisha'),
 
     FilmsModule,
     OrderModule,
