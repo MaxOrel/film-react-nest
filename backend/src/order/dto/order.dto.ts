@@ -19,7 +19,6 @@ export class OrderItemDto {
   @IsString()
   daytime: string;
 
-  @Type(() => Number)
   @IsNumber()
   row: number;
 
@@ -37,8 +36,8 @@ export class CreateOrderDto {
   @IsString()
   phone: string;
 
-  @IsArray()
   @ArrayNotEmpty()
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   tickets: OrderItemDto[];
