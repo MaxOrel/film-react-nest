@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { OrderItemDto } from './dto/order.dto';
 import { FilmsRepository } from 'src/repository/films.repository';
@@ -49,7 +50,7 @@ export class OrderService {
       total: dto.length,
       items: dto.map((item) => ({
         ...item,
-        id: crypto.randomUUID(),
+        id: randomUUID(),
       })),
     };
   }
