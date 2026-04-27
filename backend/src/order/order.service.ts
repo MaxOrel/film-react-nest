@@ -21,11 +21,15 @@ export class OrderService {
       }
 
       const session = film.schedule.find(
-      (s) => String(s.id) === String(item.session),
+        (s) => String(s.id) === String(item.session),
       );
 
       if (!session) {
         throw new BadRequestException({ error: 'session not found' });
+      }
+
+      if (!session.taken) {
+      session.taken = [];
       }
 
       const seatKey = `${item.row}:${item.seat}`;
