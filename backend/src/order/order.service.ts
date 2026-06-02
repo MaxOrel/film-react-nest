@@ -2,13 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOrderDto, OrderResponseItemDto } from './dto/order.dto';
 import { ApiResponseDto } from '../films/dto/films.dto';
 import { FilmsRepository } from '../repository/films.repository';
+import * as crypto from 'crypto'; // Импортируем модуль crypto
 
 @Injectable()
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
   private generateUUID(): string {
-    return crypto.randomUUID(); // Можно оставить так или вынести при необходимости
+    return crypto.randomUUID(); // Используем импортированный crypto
   }
 
   async create(
