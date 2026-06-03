@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Film, FilmDocument } from '../films/schemas/film.schema';
@@ -40,25 +40,25 @@ export class FilmsRepository {
     );
   }
   // Расписание конкретного фильма по его ID
-async findSchedule(id: string): Promise<ScheduleDto[] | null> {
-  const film = await this.filmModel.findOne({ id }).lean().exec();
-  // Просто возвращаем null, если фильм не найден
-  if (!film) {
-    return null;
+  async findSchedule(id: string): Promise<ScheduleDto[] | null> {
+    const film = await this.filmModel.findOne({ id }).lean().exec();
+    // Просто возвращаем null, если фильм не найден
+    if (!film) {
+      return null;
+    }
+    // Возвращаем расписание
+    return (film.schedule || []).map(
+      ({ id: sessionId, daytime, hall, rows, seats, price, taken }) => ({
+        id: sessionId,
+        daytime: new Date(daytime),
+        hall,
+        rows,
+        seats,
+        price,
+        taken,
+      }),
+    );
   }
-  // Возвращаем расписание
-  return (film.schedule || []).map(
-    ({ id: sessionId, daytime, hall, rows, seats, price, taken }) => ({
-      id: sessionId,
-      daytime: new Date(daytime),
-      hall,
-      rows,
-      seats,
-      price,
-      taken,
-    }),
-  );
-}
   // Бронирование билета
   async bookTicket(
     filmId: string,

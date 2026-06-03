@@ -16,7 +16,9 @@ export class FilmsService {
   async findSchedule(id: string): Promise<ApiResponseDto<ScheduleDto>> {
     const items = await this.filmsRepository.findSchedule(id);
     if (!items || items.length === 0) {
-      throw new NotFoundException(`Расписание для фильма с ID ${id} не найдено`);
+      throw new NotFoundException(
+        `Расписание для фильма с ID ${id} не найдено`,
+      );
     }
     return { total: items.length, items };
   }
