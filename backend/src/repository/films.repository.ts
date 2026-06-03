@@ -40,25 +40,25 @@ export class FilmsRepository {
     );
   }
   // Расписание конкретного фильма по его ID
-  async findSchedule(id: string): Promise<ScheduleDto[]> {
-    const film = await this.filmModel.findOne({ id }).lean().exec();
-    // Ошибка, если такой фильм не найден
-    if (!film) {
-      throw new NotFoundException(`Film with id ${id} not found`);
-    }
-    // Расписание
-    return (film.schedule || []).map(
-      ({ id: sessionId, daytime, hall, rows, seats, price, taken }) => ({
-        id: sessionId,
-        daytime: new Date(daytime),
-        hall,
-        rows,
-        seats,
-        price,
-        taken,
-      }),
-    );
+async findSchedule(id: string): Promise<ScheduleDto[] | null> {
+  const film = await this.filmModel.findOne({ id }).lean().exec();
+  // Просто возвращаем null, если фильм не найден
+  if (!film) {
+    return null;
   }
+  // Возвращаем расписание
+  return (film.schedule || []).map(
+    ({ id: sessionId, daytime, hall, rows, seats, price, taken }) => ({
+      id: sessionId,
+      daytime: new Date(daytime),
+      hall,
+      rows,
+      seats,
+      price,
+      taken,
+    }),
+  );
+}
   // Бронирование билета
   async bookTicket(
     filmId: string,
