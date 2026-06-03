@@ -19,7 +19,7 @@ async function bootstrap() {
   });
 
   await app.listen(3000);
-  console.log('🚀 Сервер запущен на http://localhost:3000');
+  console.log('Сервер запущен на http://localhost:3000');
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 }
