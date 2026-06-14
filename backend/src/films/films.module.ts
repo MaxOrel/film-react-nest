@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilmsController } from './films.controller';
 import { FilmsService } from './films.service';
 import { FilmsRepository } from '../repository/films.repository';
-import { Film, FilmSchema } from './schemas/film.schema'; // путь к схеме
-
+import { Film } from 'src/entities/film.entity';
+import { Schedule } from 'src/entities/schedule.entity';
+// Декорация класса 
 @Module({
-  imports: [
-    // обязательно подключите схему
-    MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }]),
-  ],
+  imports: [TypeOrmModule.forFeature([Film, Schedule])],
   controllers: [FilmsController],
   providers: [FilmsService, FilmsRepository],
   exports: [FilmsRepository],

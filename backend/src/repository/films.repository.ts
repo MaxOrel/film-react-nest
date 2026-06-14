@@ -1,64 +1,68 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Film, FilmDocument } from '../films/schemas/film.schema';
-import { FilmDto, ScheduleDto } from '../films/dto/films.dto';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Film } from '../entities/film.entity';
+import { Schedule } from '../entities/schedule.entity';
+// Для информации о расписаниях билета  
+export class ScheduleDto {
+  id: string;
+  daytime: Date;
+  hall: number;
+  rows: number;
+  seats: number;
+  price: number;
+  taken: string[];
+}
+// Для информации о фильмах
+export class FilmDto {
+  id: string;
+  rating: number;
+  director: string;
+  tags: string[];
+  title: string;
+  about: string;
+  description: string;
+  image: string;
+  cover: string;
+}
+// Объявление класса
 @Injectable()
 export class FilmsRepository {
-  // Конструктор с внедрением модели Mongoose для документов типа Film
   constructor(
-    @InjectModel(Film.name) private readonly filmModel: Model<FilmDocument>,
+    @InjectRepository(Film)
+    private readonly filmRepository: Repository<Film>,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
   ) {}
 
+  // Получение всех фильмов без расписаний
   async findAll(): Promise<FilmDto[]> {
-    // Выполняем поиск всех фильмов; поля schedule исключены
-    const films = await this.filmModel.find({}, { schedule: 0 }).lean().exec();
-    // Проходим по списку фильмов и возвращаем массив объектов только с нужными полями
-    return films.map(
-      ({
-        id,
-        rating,
-        director,
-        tags,
-        title,
-        about,
-        description,
-        image,
-        cover,
-      }) => ({
-        id,
-        rating,
-        director,
-        tags,
-        title,
-        about,
-        description,
-        image,
-        cover,
-      }),
-    );
+    const films = await this.filmRepository.find({
+      select: ['id', 'rating', 'director', 'tags', 'title', 'about', 'description', 'image', 'cover'],
+    });
+    return films;
   }
-  // Расписание конкретного фильма по его ID
+
+  // Получение расписания конкретного фильма по его ID
   async findSchedule(id: string): Promise<ScheduleDto[] | null> {
-    const film = await this.filmModel.findOne({ id }).lean().exec();
-    // Просто возвращаем null, если фильм не найден
-    if (!film) {
+    const film = await this.filmRepository.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
+    if (!film || !film.schedules) {
       return null;
     }
-    // Возвращаем расписание
-    return (film.schedule || []).map(
-      ({ id: sessionId, daytime, hall, rows, seats, price, taken }) => ({
-        id: sessionId,
-        daytime: new Date(daytime),
-        hall,
-        rows,
-        seats,
-        price,
-        taken,
-      }),
-    );
+    return film.schedules.map((schedule) => ({
+      id: schedule.id,
+      daytime: new Date(schedule.daytime),
+      hall: schedule.hall,
+      rows: schedule.rows,
+      seats: schedule.seats,
+      price: schedule.price,
+      taken: schedule.taken,
+    }));
   }
+
   // Бронирование билета
   async bookTicket(
     filmId: string,
@@ -67,21 +71,23 @@ export class FilmsRepository {
     seat: number,
   ): Promise<boolean> {
     const seatKey = `${row}:${seat}`;
+    const schedule = await this.scheduleRepository.findOne({
+      where: {
+        id: sessionId,
+        film: { id: filmId },
+      },
+    });
+    if (!schedule) {
+      return false;
+    }
 
-    const result = await this.filmModel
-      .findOneAndUpdate(
-        {
-          id: filmId,
-          'schedule.id': sessionId,
-          'schedule.taken': { $ne: seatKey },
-        },
-        {
-          $push: { 'schedule.$.taken': seatKey },
-        },
-        { new: true },
-      )
-      .exec();
-    // Маркер того, что бронирование прошло успешно
-    return result !== null;
+    if (schedule.taken.includes(seatKey)) {
+      return false; // Место уже занято
+    }
+
+    // Добавляем место в занятые и сохраняем
+    schedule.taken = [...schedule.taken, seatKey];
+    await this.scheduleRepository.save(schedule);
+    return true;
   }
 }
