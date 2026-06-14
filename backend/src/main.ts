@@ -3,9 +3,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
-import * as crypto from 'crypto';
 
-(global as any).crypto = crypto;
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 

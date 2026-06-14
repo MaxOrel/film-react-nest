@@ -7,8 +7,10 @@ import { FilmsRepository } from '../repository/films.repository';
 export class OrderService {
   constructor(private readonly filmsRepository: FilmsRepository) {}
 
+  // Генерация уникального ID
   private generateUUID(): string {
-    return crypto.randomUUID(); // Используем импортированный crypto
+    // Простая альтернатива: текущие миллисекунды + случайное число
+    return Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
   }
 
   async create(
