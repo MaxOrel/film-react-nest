@@ -2,7 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOrderDto, OrderResponseItemDto } from './dto/order.dto';
 import { ApiResponseDto } from '../films/dto/films.dto';
 import { FilmsRepository } from '../repository/films.repository';
+import * as crypto from 'crypto';
 
+(global as any).crypto = crypto;
 
 @Injectable()
 export class OrderService {
