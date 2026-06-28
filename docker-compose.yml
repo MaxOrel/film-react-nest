@@ -1,11 +1,11 @@
-version: '3.9'
+
 
 services:
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: ghcr.io/yourusername/your-frontend:latest
+    image: ghcr.io/anastasias99/frontend:review_17_sprint
     ports:
       - "80:80"
     networks:
@@ -17,7 +17,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ghcr.io/yourusername/your-backend:latest
+    image: ghcr.io/anastasias99/backend:review_17_sprint
     environment:
       - NODE_ENV=production
     ports:
@@ -33,7 +33,7 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    image: ghcr.io/yourusername/your-nginx:latest
+    image: ghcr.io/anastasias99/nginx:review_17_sprint
     ports:
       - "80:80"
     networks:
@@ -46,9 +46,9 @@ services:
     image: postgres:13
     restart: always
     environment:
-      POSTGRES_DB: yourdb
-      POSTGRES_USER: youruser
-      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: prac
+      POSTGRES_USER: prac
+      POSTGRES_PASSWORD: prac
     ports:
       - "5432:5432"
     volumes:
