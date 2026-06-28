@@ -1,0 +1,75 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ghcr.io/yourusername/your-frontend:latest
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ghcr.io/yourusername/your-backend:latest
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    volumes:
+      - backend-data:/app/data
+    depends_on:
+      - db
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: ghcr.io/yourusername/your-nginx:latest
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: yourdb
+      POSTGRES_USER: youruser
+      POSTGRES_PASSWORD: yourpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+networks:
+  app-network:
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  backend-data:
