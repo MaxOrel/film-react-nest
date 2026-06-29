@@ -1,5 +1,3 @@
-
-
 services:
   frontend:
     build:
@@ -7,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: ghcr.io/anastasias99/frontend:review_17_sprint
     ports:
-      - "80:80"
+      - "8080:80" 
     networks:
       - app-network
     volumes:
@@ -18,8 +16,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: ghcr.io/anastasias99/backend:review_17_sprint
-    environment:
-      - NODE_ENV=production
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     networks:
@@ -27,7 +25,7 @@ services:
     volumes:
       - backend-data:/app/data
     depends_on:
-      - db
+      - db  # важно: гарантировать старт базы
 
   nginx:
     build:
@@ -49,6 +47,8 @@ services:
       POSTGRES_DB: prac
       POSTGRES_USER: prac
       POSTGRES_PASSWORD: prac
+    networks:
+      - app-network
     ports:
       - "5432:5432"
     volumes:
@@ -60,7 +60,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "8080:80"
+      - "8090:80"  
     networks:
       - app-network
     volumes:
