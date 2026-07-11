@@ -60,7 +60,7 @@ services:
     restart: on-failure
     networks:
       - internal
-    depends_on: 
+    depends_on:
       - database
 
   server:
