@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Film, FilmDocument } from './schemas/film.schema';
@@ -25,11 +25,9 @@ export class RepositoryService {
     return this.toFilmDto(film as unknown as Film);
   }
 
-  async getSchedule(filmId: string): Promise<ScheduleItemDto[]> {
+  async getSchedule(filmId: string): Promise<ScheduleItemDto[] | null> {
     const film = await this.getById(filmId);
-    if (!film) {
-      throw new NotFoundException('Film not found');
-    }
+    if (!film) return null;
     return film.schedule;
   }
 
