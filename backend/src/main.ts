@@ -1,3 +1,6 @@
+import * as crypto from 'crypto';
+globalThis.crypto = crypto as any;
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
