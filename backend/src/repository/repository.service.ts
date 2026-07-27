@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Film } from './entities/film.entity';
 import { Schedule } from './entities/schedule.entity';
 import {
@@ -8,7 +8,12 @@ import {
   FilmListItemDto,
   ScheduleItemDto,
 } from '../films/dto/films.dto';
-import { FilmsRepository } from './films-repository.interface';
+import {
+  FilmsRepository,
+  ScheduleUpdate,
+  ScheduleNotFoundError,
+  ScheduleConflictError,
+} from './films-repository.interface';
 
 @Injectable()
 export class RepositoryService implements FilmsRepository {
@@ -17,6 +22,8 @@ export class RepositoryService implements FilmsRepository {
     private readonly filmRepository: Repository<Film>,
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   async getAll(): Promise<FilmListItemDto[]> {
@@ -28,6 +35,7 @@ export class RepositoryService implements FilmsRepository {
     const film = await this.filmRepository.findOne({
       where: { id },
       relations: ['schedule'],
+      order: { rating: 'ASC' },
     });
     if (!film) return null;
     return this.toFilmDto(film);
@@ -37,7 +45,6 @@ export class RepositoryService implements FilmsRepository {
     const film = await this.filmRepository.findOne({
       where: { id: filmId },
       select: ['id'],
-      order: { rating: 'ASC' },
     });
     if (!film) return null;
 
@@ -66,6 +73,34 @@ export class RepositoryService implements FilmsRepository {
       { id: scheduleId, film: { id: filmId } },
       { taken },
     );
+  }
+
+  async batchUpdateSchedule(updates: ScheduleUpdate[]): Promise<void> {
+    await this.dataSource.transaction(async (entityManager) => {
+      for (const update of updates) {
+        const schedule = await entityManager.findOne(Schedule, {
+          where: { id: update.scheduleId },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!schedule) {
+          throw new ScheduleNotFoundError(update.scheduleId);
+        }
+
+        const requestedSet = new Set(update.taken);
+        const hasConflict = schedule.taken.some((s) => !requestedSet.has(s));
+        if (hasConflict) {
+          throw new ScheduleConflictError(
+            'Сеанс был изменён другим запросом. Попробуйте снова.',
+          );
+        }
+
+        await entityManager.update(
+          Schedule,
+          { id: update.scheduleId },
+          { taken: update.taken },
+        );
+      }
+    });
   }
 
   private toFilmListItem(film: Film): FilmListItemDto {

@@ -18,14 +18,22 @@ import { Schedule } from './repository/entities/schedule.entity';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
-        username: configService.get<string>('DATABASE_USERNAME'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        entities: [Film, Schedule],
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const driver = configService.get<string>('DATABASE_DRIVER');
+        if (driver !== 'postgres') {
+          throw new Error(
+            `DATABASE_DRIVER must be 'postgres', got '${driver}'`,
+          );
+        }
+        return {
+          type: 'postgres',
+          url: configService.get<string>('DATABASE_URL'),
+          username: configService.get<string>('DATABASE_USERNAME'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          entities: [Film, Schedule],
+          synchronize: true,
+        };
+      },
       inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({

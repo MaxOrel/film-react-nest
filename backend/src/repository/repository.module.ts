@@ -6,7 +6,12 @@ import { RepositoryService } from './repository.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Film, Schedule])],
-  providers: [RepositoryService],
-  exports: [RepositoryService],
+  providers: [
+    {
+      provide: 'FILMS_REPOSITORY',
+      useClass: RepositoryService,
+    },
+  ],
+  exports: ['FILMS_REPOSITORY'],
 })
 export class RepositoryModule {}
