@@ -4,7 +4,7 @@ import { OrderService } from './order.service';
 import { DatabaseModule } from '../database/database.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule.register()],
   controllers: [OrderController],
   providers: [OrderService],
 })

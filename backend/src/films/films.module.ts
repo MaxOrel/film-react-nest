@@ -4,7 +4,7 @@ import { FilmsService } from './films.service';
 import { DatabaseModule } from '../database/database.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule.register()],
   controllers: [FilmsController],
   providers: [FilmsService],
 })
