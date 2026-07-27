@@ -22,11 +22,16 @@ export class DatabaseModule {
               );
             }
 
-            const url = config.get<string>('DATABASE_URL');
+            const mode = config.get<string>('DATABASE_MODE', 'local');
             const synchronize =
               config.get<string>('DATABASE_SYNCHRONIZE') === 'true';
 
-            if (url) {
+            if (mode === 'cloud') {
+              const url = config.get<string>('DATABASE_URL');
+              if (!url) {
+                throw new Error('DATABASE_URL is required when DATABASE_MODE=cloud');
+              }
+
               return {
                 type: 'postgres',
                 url,
@@ -36,19 +41,13 @@ export class DatabaseModule {
               };
             }
 
-            const host = config.get<string>('DATABASE_HOST');
-            const port = Number(config.get<string>('DATABASE_PORT'));
-            const username = config.get<string>('DATABASE_USERNAME');
-            const password = config.get<string>('DATABASE_PASSWORD');
-            const database = config.get<string>('DATABASE_NAME');
-
             return {
               type: 'postgres',
-              host,
-              port,
-              username,
-              password,
-              database,
+              host: config.get<string>('DATABASE_HOST', 'localhost'),
+              port: Number(config.get<string>('DATABASE_PORT', '5432')),
+              username: config.get<string>('DATABASE_USERNAME', 'postgres'),
+              password: config.get<string>('DATABASE_PASSWORD', 'postgres'),
+              database: config.get<string>('DATABASE_NAME', 'films'),
               ssl: false,
               entities: [Film, Schedule],
               synchronize,
