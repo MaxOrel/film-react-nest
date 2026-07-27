@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Film } from '../repository/entities/film.entity';
 import { Schedule } from '../repository/entities/schedule.entity';
 import { RepositoryService } from '../repository/repository.service';
@@ -14,27 +14,45 @@ export class DatabaseModule {
         TypeOrmModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
-          useFactory: (configService: ConfigService) => {
-            const driver = configService.get<string>('DATABASE_DRIVER');
+          useFactory: (config: ConfigService): TypeOrmModuleOptions => {
+            const driver = config.get<string>('DATABASE_DRIVER', 'postgres');
             if (driver !== 'postgres') {
               throw new Error(
                 `DATABASE_DRIVER must be 'postgres', got '${driver}'`,
               );
             }
 
-            const options: Record<string, unknown> = {
+            const url = config.get<string>('DATABASE_URL');
+            const synchronize =
+              config.get<string>('DATABASE_SYNCHRONIZE') === 'true';
+
+            if (url) {
+              return {
+                type: 'postgres',
+                url,
+                ssl: { rejectUnauthorized: false },
+                entities: [Film, Schedule],
+                synchronize,
+              };
+            }
+
+            const host = config.get<string>('DATABASE_HOST');
+            const port = Number(config.get<string>('DATABASE_PORT'));
+            const username = config.get<string>('DATABASE_USERNAME');
+            const password = config.get<string>('DATABASE_PASSWORD');
+            const database = config.get<string>('DATABASE_NAME');
+
+            return {
               type: 'postgres',
-              url: configService.get<string>('DATABASE_URL'),
+              host,
+              port,
+              username,
+              password,
+              database,
+              ssl: false,
               entities: [Film, Schedule],
-              synchronize: true,
+              synchronize,
             };
-
-            const username = configService.get<string>('DATABASE_USERNAME');
-            const password = configService.get<string>('DATABASE_PASSWORD');
-            if (username) options.username = username;
-            if (password) options.password = password;
-
-            return options;
           },
         }),
         TypeOrmModule.forFeature([Film, Schedule]),
