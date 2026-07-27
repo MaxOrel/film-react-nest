@@ -1,5 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Film } from '../repository/entities/film.entity';
 import { Schedule } from '../repository/entities/schedule.entity';
@@ -12,6 +12,7 @@ export class DatabaseModule {
       module: DatabaseModule,
       imports: [
         TypeOrmModule.forRootAsync({
+          imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: (configService: ConfigService) => {
             const driver = configService.get<string>('DATABASE_DRIVER');
